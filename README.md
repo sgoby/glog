@@ -11,7 +11,7 @@
 ## Installation
 
 ```go
-go get github/sgoby/glog
+go get github.com/sgoby/glog
 ```
 
 
