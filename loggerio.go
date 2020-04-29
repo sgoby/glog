@@ -10,7 +10,8 @@ import (
 	"strings"
 )
 
-
+//flush 的时间间隔
+var flushInterval = time.Millisecond * 100
 //
 func (l *Logger)getLogger() (*log.Logger,error){
 	var err error
@@ -124,11 +125,11 @@ func (l *Logger) flush()  {
 		l.flushBuf()
 		<-l.flushChann
 	default:
-		if time.Now().Sub(l.lastFlushTime) > time.Millisecond * 100{
+		if time.Now().Sub(l.lastFlushTime) > flushInterval{
 			if l.nextFlushTimer != nil{
 				l.nextFlushTimer.Stop()
 			}
-			l.nextFlushTimer = time.AfterFunc(time.Millisecond * 100,l.flush)
+			l.nextFlushTimer = time.AfterFunc(flushInterval,l.flush)
 		}
 	}
 	return
@@ -143,7 +144,7 @@ func (l *Logger) flushBuf(){
 		return
 	}
 	//
-	if l.bufWriter.Size() > 1024 || time.Now().Sub(l.lastFlushTime) > time.Millisecond * 100{
+	if l.bufWriter.Size() > 1024 || time.Now().Sub(l.lastFlushTime) > flushInterval{
 		err := l.bufWriter.Flush()
 		if err != nil{
 			fmt.Println(err)
@@ -153,7 +154,7 @@ func (l *Logger) flushBuf(){
 			l.nextFlushTimer.Stop()
 		}
 		l.lastFlushTime = time.Now()
-		l.nextFlushTimer = time.AfterFunc(time.Millisecond * 100,l.flush)
+		l.nextFlushTimer = time.AfterFunc(flushInterval,l.flush)
 	}
 	return
 }
