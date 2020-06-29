@@ -48,11 +48,11 @@ func (l *Logger)getLogger() (*log.Logger,error){
 
 //
 func (l *Logger) createFileLogger(path,fileName  string) (lg *log.Logger,err error){
-	l.muCreate.Lock()
 	l.flushChann <- 1
+	l.muCreate.Lock()
 	defer func() {
-		<-l.flushChann
 		l.muCreate.Unlock()
+		<-l.flushChann
 	}()
 
 	if len(l.logFilePath) > 0 && l.logFilePath == fileName{

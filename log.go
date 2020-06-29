@@ -17,31 +17,39 @@ func init(){
 	logMu = new(sync.RWMutex)
 }
 
-var  defautlTag = "app"
+const  defautlTag = "app"
+var firstTag = ""
 //
 func OnInit(v interface{}) error{
 	cnf,ok := v.(Config)
 	if !ok{
 		return errors.New("is no log config")
 	}
+	if len(cnf.Tag) < 1 {
+		cnf.Tag = defautlTag
+	}
+
 	//
 	lg,err := newLogger(cnf)
 	if err != nil{
 		return err
 	}
-	if defautlTag == "app" {
-		defautlTag = lg.cnf.Tag
-	}
 	//
 	lg.Info("==== log init finish ====")
 	lg.calldepth = calldepth
 	loggerMap[lg.cnf.Tag] = lg
+	if len(firstTag) < 1{
+		firstTag = lg.cnf.Tag
+	}
 	return nil
 }
 
 //
 func Tag(tags ...string) *Logger{
-	tag := defautlTag
+	if len(firstTag) < 1{
+		firstTag = defautlTag
+	}
+	tag := firstTag
 	if len(tags) > 0{
 		tag = tags[0]
 	}

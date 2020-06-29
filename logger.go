@@ -159,3 +159,8 @@ func (l *Logger)output(lv uint, args ...interface{}) {
 		l.flush()
 	}
 }
+//
+func (l *Logger) Write(p []byte) (n int, err error){
+	l.output(INFO,string(p))
+	return len(p),nil
+}
