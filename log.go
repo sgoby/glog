@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"sync"
+	"os"
 )
 
 const calldepth  =4
@@ -28,7 +29,11 @@ func OnInit(v interface{}) error{
 	if len(cnf.Tag) < 1 {
 		cnf.Tag = defautlTag
 	}
-
+	//
+	if len(cnf.FileLogPath) < 1 {
+		localPath, _ := os.Getwd()
+		cnf.FileLogPath = localPath + "/logs"
+	}
 	//
 	lg,err := newLogger(cnf)
 	if err != nil{
@@ -46,9 +51,6 @@ func OnInit(v interface{}) error{
 
 //
 func Tag(tags ...string) *Logger{
-	if len(firstTag) < 1{
-		firstTag = defautlTag
-	}
 	tag := firstTag
 	if len(tags) > 0{
 		tag = tags[0]

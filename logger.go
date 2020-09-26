@@ -3,10 +3,10 @@ package glog
 import (
 	"log"
 	"fmt"
-	"sync"
 	"bufio"
 	"os"
-	"time"
+	"strings"
+	"io"
 )
 
 type logWriter interface {
@@ -16,23 +16,17 @@ type logWriter interface {
 	Sync() (err error)
 }
 
-
 type Logger struct {
-	cnf            Config
-	logger         *log.Logger
-	muCreate       *sync.Mutex
-	logFilePath    string
-	fileHandler    logWriter
-	calldepth      int
-	logLevel       uint
-	bufWriter      *bufio.Writer
-	flushChann     chan uint
-	lastFlushTime  time.Time
-	nextFlushTimer *time.Timer
+	cnf         Config
+	mlogger     ILogger
+	fileHandler logWriter
+	calldepth   int
+	logLevel    uint
+	bufWriter   *bufio.Writer
 }
 
 //
-func newLogger(cnf Config) (*Logger,error){
+func newLogger(cnf Config) (lg *Logger,err error){
 	if len(cnf.Tag) < 1{
 		cnf.Tag = defautlTag
 	}
@@ -46,16 +40,17 @@ func newLogger(cnf Config) (*Logger,error){
 			break
 		}
 	}
+	if len(cnf.SplitType) < 1{
+		cnf.SplitType = SplitDaily
+	}
 	cnf.limitSize = getByteSizeByM(cnf.SplitType)
-	//
-	lg := &Logger{
+	lg = &Logger{
 		cnf:cnf,
-		muCreate:new(sync.Mutex),
 		calldepth:3,
 		logLevel:uint(lv),
-		flushChann:make(chan uint,1),
 	}
-	return lg,nil
+	lg.mlogger,err = lg.getLogger()
+	return lg,err
 }
 
 
@@ -135,32 +130,46 @@ func (l *Logger)PanicRuntimeCaller(args ...interface{}){
 	l.output(FATAL,fmt.Sprintf("%s%s", argsStr,runMsg))
 }
 //======================================
-//
 func (l *Logger)output(lv uint, args ...interface{}) {
 	lvTag, ok := logLevelMap[lv]
 	if !ok {
 		return
 	}
 	//
-	gLogger,err := l.getLogger()
-	if err != nil{
-		log.Println(err)
-		return
-	}
-	if gLogger != nil{
-		select {
-		case l.flushChann <- 1:
-			err = gLogger.Output(l.calldepth,fmt.Sprintf("[%s] %s\n", lvTag, fmt.Sprint(args...)))
-			if err != nil{
-				log.Println(err)
-			}
-			<-l.flushChann
+	var err error
+	if l.mlogger != nil{
+		if mlogio,ok := l.mlogger.(*Logio);ok {
+			err = mlogio.OutputByLv(l.calldepth, lvTag, fmt.Sprintf("%s\n", fmt.Sprint(args...)))
+		}else{
+			err = l.mlogger.Output(l.calldepth, fmt.Sprintf("[%s] %s\n", lvTag, fmt.Sprint(args...)))
 		}
-		l.flush()
+	}
+	if err != nil {
+		log.Println(err)
 	}
 }
+
 //
 func (l *Logger) Write(p []byte) (n int, err error){
 	l.output(INFO,string(p))
 	return len(p),nil
+}
+
+//
+func (l *Logger)getLogger() (g ILogger,err error){
+	if strings.ToLower(strings.TrimSpace(l.cnf.LogType)) == "syslog"{
+		return l.createSyslogLogger()
+	}
+	//
+	lg := NewLogio(Ldate|Ltime|Lshortfile)
+	logfile,err := createLogFile(&l.cnf)
+	if err != nil{
+		return nil,err
+	}
+	if l.cnf.AlsoStdout {
+		lg.ResetWriter(io.MultiWriter(logfile, os.Stdout))
+	}else{
+		lg.ResetWriter(logfile)
+	}
+	return lg,nil
 }

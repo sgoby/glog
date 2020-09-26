@@ -4,11 +4,11 @@ import (
 	"runtime"
 	"strings"
 	"fmt"
-	"os"
-	"time"
-	"regexp"
 	"strconv"
 )
+
+
+
 
 // private
 func readRuntimeCaller() string {
@@ -34,54 +34,24 @@ func readRuntimeCaller() string {
 	}
 	return message
 }
-
-//
-func getLogFilePath(cnf Config,currentSize int64) (string,string){
-	path := cnf.FileLogPath
-	tag := cnf.Tag
-	if len(path) < 1 {
-		localPath, _ := os.Getwd()
-		path = localPath + "/logs"
-	}
-	//
-	if len(tag) < 1{
-		tag = "app"
-	}
-	//split with filezie limit
-	if cnf.limitSize > 0 && currentSize >= cnf.limitSize {
-		return path,fmt.Sprintf("%s/%s_%d.log", path,tag,time.Now().UnixNano())
-	}
-	//
-	splitType := "Daily"
-	if len(cnf.SplitType) > 0{
-		splitType = cnf.SplitType
-	}
-	switch splitType {
-	case "Daily":
-		return path,fmt.Sprintf("%s/%s_%s.log", path,tag, time.Now().Format("2006-01-02"))
-	case "Hourly":
-		return path,fmt.Sprintf("%s/%s_%s.log", path,tag, time.Now().Format("2006-01-02_15"))
-	}
-	return path,fmt.Sprintf("%s/%s.log", path,tag)
-}
-
 //
 func getByteSizeByM(fSize string) (v int64){
-	reg,err := regexp.Compile(`\d+[m|M|mb|MB|mB|Mb]`)
-	if err != nil{
-		fmt.Println(err)
-		return 0
+	fSize = strings.Trim(fSize, " \r\n")
+	num := 1
+	mult := 1024
+	if len(fSize) > 1 {
+		switch fSize[len(fSize)-1] {
+		case 'G', 'g':
+			num *= mult
+			fallthrough
+		case 'M', 'm':
+			num *= mult
+			fallthrough
+		case 'K', 'k':
+			num *= mult
+			fSize = fSize[0 : len(fSize)-1]
+		}
 	}
-	if !reg.MatchString(fSize){
-		return 0
-	}
-	//
-	reg,err = regexp.Compile(`[m|M|b|B]`)
-	fSize = reg.ReplaceAllString(fSize,"")
-	v,err = strconv.ParseInt(fSize,10,64)
-	if err != nil{
-		return 0
-	}
-	v = v * 1024 * 1024
-	return v
+	parsed, _ := strconv.Atoi(fSize)
+	return int64(parsed * num)
 }

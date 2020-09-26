@@ -11,12 +11,13 @@ func Test_log(t *testing.T){
 	//Info("hahaha1111111")
 	//Tag("app").Info("asdfasdfasdf")
 
-	OnInit(Config{LogType:"syslog"})
+	//OnInit(Config{LogType:"syslog"})
+	OnInit(Config{})
 
 	wg := &sync.WaitGroup{}
 	beginTime := time.Now()
 
-	for i := 0; i < 1;i++ {
+	for i := 0; i < 100000;i++ {
 		wg.Add(1)
 		go writeLog(wg)
 	}
