@@ -95,6 +95,9 @@ func (b *Writer) asyncFlush() error {
 	if n > 0{
 		copy(b.buf[0:], b.buf[n:])
 		b.n -= n
+		if b.n < 0{
+			b.n = 0
+		}
 	}
 	b.mu.Unlock()
 	return err
