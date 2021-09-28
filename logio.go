@@ -36,9 +36,21 @@ type Logio struct {
 	mu   sync.Mutex
 }
 
+var spaceBuf []byte
+
+func init() {
+	spaceBuf = make([]byte, 0, 32)
+	for i := 0; i < 32; i++ {
+		spaceBuf = append(spaceBuf, []byte(" ")...)
+	}
+}
 //
 func NewLogio(flag int) *Logio {
-	return &Logio{flag: flag,bufw:NewWriter(os.Stdout)}
+	return &Logio{
+		flag: flag,
+		bufw: NewWriter(os.Stdout),
+		buf:  make([]byte, 0, 1024),
+	}
 }
 
 //
@@ -145,6 +157,7 @@ func (l *Logio) formatHeader(buf *[]byte, t time.Time, file string, line int,pre
 		*buf = append(*buf, "["...)
 		*buf = append(*buf, prefix...)
 		*buf = append(*buf, "] "...)
+		*buf = appendSpace(*buf,6 - len(prefix))
 	}
 	//
 	if l.flag&(Lshortfile|Llongfile) != 0 {
@@ -161,7 +174,7 @@ func (l *Logio) formatHeader(buf *[]byte, t time.Time, file string, line int,pre
 		*buf = append(*buf, file...)
 		*buf = append(*buf, ':')
 		itoa(buf, line, -1)
-		*buf = append(*buf, ": "...)
+		*buf = append(*buf, "  "...)
 	}
 }
 
@@ -180,4 +193,12 @@ func itoa(buf *[]byte, i int, wid int) {
 	// i < 10
 	b[bp] = byte('0' + i)
 	*buf = append(*buf, b[bp:]...)
+}
+
+//
+func appendSpace(buf []byte,l int)([]byte){
+	if l > 0 && l < len(spaceBuf){
+		buf = append(buf, spaceBuf[:l]...)
+	}
+	return buf
 }

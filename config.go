@@ -10,12 +10,12 @@ const (
 )
 //
 var logLevelMap map[uint]string = map[uint]string{
-	DEBUG: "Debug",
-	INFO:  "Info",
-	WARN:  "Warn",
-	ERROR: "Error",
-	FATAL: "Fatal",
-	OFF:   "Off",
+	DEBUG: "DEBUG",
+	INFO:  "INFO",
+	WARN:  "WARN",
+	ERROR: "ERROR",
+	FATAL: "FATAL",
+	OFF:   "OFF",
 }
 
 //

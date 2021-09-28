@@ -17,7 +17,7 @@ func Test_log(t *testing.T){
 	wg := &sync.WaitGroup{}
 	beginTime := time.Now()
 
-	for i := 0; i < 100000;i++ {
+	for i := 0; i < 2;i++ {
 		wg.Add(1)
 		go writeLog(wg)
 	}
@@ -32,6 +32,9 @@ func Test_log(t *testing.T){
 func writeLog(wg *sync.WaitGroup){
 	defer wg.Done()
 	for i:=0;i < 10;i++ {
+		Debug(i,"为什么博主会特意讲一")
 		Info(i,"为什么博主会特意讲一下centos mini版的安装步骤呢，因为博主在VMware workstation上安装的非mini版本的centos,本想安装mini版1")
+		Warn(i,"为什么博主会特意讲一")
+		Error(i,"为什么博主会特意讲一22")
 	}
 }
