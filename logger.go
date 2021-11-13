@@ -33,9 +33,10 @@ func newLogger(cnf Config) (lg *Logger,err error){
 	if len(cnf.Level) < 1{
 		cnf.Level = "Debug"
 	}
+	cnf.Level = strings.TrimSpace(cnf.Level)
 	lv := 0
 	for i,val := range logLevelMap{
-		if val == cnf.Level{
+		if val == strings.ToUpper(cnf.Level){
 			lv = int(i)
 			break
 		}
