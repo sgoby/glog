@@ -1,6 +1,6 @@
 // User: szh
-// Date: 2020/9/23
-// Time: 16:04
+// Date: 2020/11/3
+// Time: 11:02
 
 package glog
 
@@ -71,7 +71,7 @@ func (b *Writer) ResetWriter(w io.Writer) {
 }
 
 // Flush writes any buffered data to the underlying io.Writer.
-func (b *Writer) asyncFlush() error {
+func (b *Writer) syncFlush() error {
 	if b.err != nil {
 		return b.err
 	}
@@ -114,7 +114,7 @@ func (b *Writer) Flush() error {
 					break
 				}
 				b.mu.Unlock()
-				b.asyncFlush()
+				b.syncFlush()
 			}
 			atomic.SwapInt32(&b.flushing,0)
 		}()
@@ -151,9 +151,10 @@ func (b *Writer) Write(p []byte) (nn int, err error) {
 			// Large write, empty buffer.
 			// Write directly from p to avoid copy.
 			n, b.err = b.wr.Write(p)
-		} else {
-			b.Flush()
-			//
+		} else if b.n >= len(b.buf) {
+			b.err = b.syncFlush()
+		}else {
+			//b.Flush()
 			b.mu.Lock()
 			n = copy(b.buf[b.n:], p)
 			b.n += n
