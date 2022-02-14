@@ -2,7 +2,7 @@ package glog
 
 import (
 	"log"
-	"fmt"
+	fmt "github.com/sgoby/glog/gfmt"
 	"bufio"
 	"os"
 	"strings"

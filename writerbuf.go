@@ -144,8 +144,7 @@ func (b *Writer) Buffered() int {
 // why the write is short.
 func (b *Writer) Write(p []byte) (nn int, err error) {
 	//b.muw.Lock()
-	l := len(b.buf)
-	for len(p) > (l - b.n) && b.err == nil {
+	for len(p) > 0 && b.err == nil {
 		var n int
 		if b.n == 0 {
 			// Large write, empty buffer.

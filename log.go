@@ -2,7 +2,7 @@ package glog
 
 import (
 	"errors"
-	"fmt"
+	fmt "github.com/sgoby/glog/gfmt"
 	"sync"
 	"os"
 )

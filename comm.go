@@ -3,8 +3,8 @@ package glog
 import (
 	"runtime"
 	"strings"
-	"fmt"
 	"strconv"
+	fmt "github.com/sgoby/glog/gfmt"
 )
 
 

@@ -63,7 +63,11 @@ SplitType = Daily
 glog.OnInit(Config{LogType:"syslog"})
 
 .....
-
+m := make(map[string]interface{})
+m["hello"] = 2022
+//format json
+DebugF("test json %j",m)
+//output   2022/02/14 12:31:59 [DEBUG]  log_test.go:19  test json {"hello":2022}
 glog.Info(1,"为什么博主会特意讲一下centos mini版的安装步骤呢")
 glog.Debug(1,"为什么博主会特意讲一下centos mini版的安装步骤呢")
 glog.Warn(1,"为什么博主会特意讲一下centos mini版的安装步骤呢")

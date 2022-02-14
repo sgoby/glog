@@ -4,7 +4,7 @@ import (
 	"testing"
 	"sync"
 	"time"
-	"fmt"
+	fmt "github.com/sgoby/glog/gfmt"
 )
 
 func Test_log(t *testing.T){
@@ -12,12 +12,16 @@ func Test_log(t *testing.T){
 	//Tag("app").Info("asdfasdfasdf")
 
 	//OnInit(Config{LogType:"syslog"})
+	m := make(map[string]interface{})
+	m["hello"] = 2022
 	OnInit(Config{})
+
+	DebugF("test json %j",m)
 
 	wg := &sync.WaitGroup{}
 	beginTime := time.Now()
 
-	for i := 0; i < 2;i++ {
+	for i := 0; i < 20;i++ {
 		wg.Add(1)
 		go writeLog(wg)
 	}

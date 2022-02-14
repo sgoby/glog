@@ -7,7 +7,7 @@ package glog
 import (
 	"os"
 	"time"
-	"fmt"
+	fmt "github.com/sgoby/glog/gfmt"
 	"sync"
 )
 
