@@ -177,7 +177,9 @@ func (b *Writer) Write(p []byte) (nn int, err error) {
 	}
 	//
 	//b.muw.Unlock()
-	b.Flush()
+	if b.n > 0{
+		b.Flush()
+	}
 	return nn, nil
 }
 

@@ -21,7 +21,7 @@ func Test_log(t *testing.T){
 	wg := &sync.WaitGroup{}
 	beginTime := time.Now()
 
-	for i := 0; i < 20;i++ {
+	for i := 0; i < 1000;i++ {
 		wg.Add(1)
 		go writeLog(wg)
 	}

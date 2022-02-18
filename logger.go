@@ -60,13 +60,13 @@ func (l *Logger)Debug(args ...interface{}) {
 	if l.logLevel > DEBUG {
 		return
 	}
-	l.output(DEBUG,args...)
+	l.output(DEBUG,"",args...)
 }
 func (l *Logger)DebugF(format string, args ...interface{}) {
 	if l.logLevel > DEBUG {
 		return
 	}
-	l.output(DEBUG,fmt.Sprintf(format, args...))
+	l.output(DEBUG,format, args...)
 }
 
 //
@@ -74,13 +74,13 @@ func (l *Logger)Info(args ...interface{}) {
 	if l.logLevel > INFO {
 		return
 	}
-	l.output(INFO,args...)
+	l.output(INFO,"",args...)
 }
 func (l *Logger)InfoF(format string, args ...interface{}) {
 	if l.logLevel > INFO {
 		return
 	}
-	l.output(INFO,fmt.Sprintf(format, args...))
+	l.output(INFO,format, args...)
 }
 
 //
@@ -88,13 +88,13 @@ func (l *Logger)Warn(args ...interface{}) {
 	if l.logLevel > WARN {
 		return
 	}
-	l.output(WARN,args...)
+	l.output(WARN,"",args...)
 }
 func (l *Logger)WarnF(format string, args ...interface{}) {
 	if l.logLevel > WARN {
 		return
 	}
-	l.output(WARN,fmt.Sprintf(format, args...))
+	l.output(WARN,format, args...)
 }
 
 //
@@ -102,13 +102,13 @@ func (l *Logger)Error(args ...interface{}) {
 	if l.logLevel > ERROR {
 		return
 	}
-	l.output(ERROR,args...)
+	l.output(ERROR,"",args...)
 }
 func (l *Logger)ErrorF(format string, args ...interface{}) {
 	if l.logLevel > ERROR {
 		return
 	}
-	l.output(ERROR,fmt.Sprintf(format, args...))
+	l.output(ERROR,format, args...)
 }
 
 //
@@ -116,22 +116,22 @@ func (l *Logger)Fatal(args ...interface{}) {
 	if l.logLevel > FATAL {
 		return
 	}
-	l.output(FATAL,args...)
+	l.output(FATAL,"",args...)
 }
 func (l *Logger)FatalF(format string, args ...interface{}) {
 	if l.logLevel > FATAL {
 		return
 	}
-	l.output(FATAL,fmt.Sprintf(format, args...))
+	l.output(FATAL,format, args...)
 }
 //
 func (l *Logger)PanicRuntimeCaller(args ...interface{}){
 	runMsg := readRuntimeCaller()
 	argsStr := fmt.Sprintf("Panic: runtime error. %v", args...)
-	l.output(FATAL,fmt.Sprintf("%s%s", argsStr,runMsg))
+	l.output(FATAL,"%s%s", argsStr,runMsg)
 }
 //======================================
-func (l *Logger)output(lv uint, args ...interface{}) {
+func (l *Logger)output(lv uint,format string, args ...interface{}) {
 	lvTag, ok := logLevelMap[lv]
 	if !ok {
 		return
@@ -139,10 +139,17 @@ func (l *Logger)output(lv uint, args ...interface{}) {
 	//
 	var err error
 	if l.mlogger != nil{
-		if mlogio,ok := l.mlogger.(*Logio);ok {
-			err = mlogio.OutputByLv(l.calldepth, lvTag, fmt.Sprintf("%s\n", fmt.Sprint(args...)))
+		logstr := ""
+		if len(format) > 0{
+			logstr = fmt.Sprintf(format, args...)
 		}else{
-			err = l.mlogger.Output(l.calldepth, fmt.Sprintf("[%s] %s\n", lvTag, fmt.Sprint(args...)))
+			logstr = fmt.Sprint(args...)
+		}
+
+		if mlogio,ok := l.mlogger.(*Logio);ok {
+			err = mlogio.OutputByLv(l.calldepth, lvTag, logstr)
+		}else{
+			err = l.mlogger.Output(l.calldepth, fmt.Sprintf("[%s] %s", lvTag, logstr))
 		}
 	}
 	if err != nil {
@@ -152,7 +159,7 @@ func (l *Logger)output(lv uint, args ...interface{}) {
 
 //
 func (l *Logger) Write(p []byte) (n int, err error){
-	l.output(INFO,string(p))
+	l.output(INFO,"",string(p))
 	return len(p),nil
 }
 
