@@ -4,12 +4,12 @@
 package gfmt
 
 import (
+	"encoding/json"
 	"io"
 	"os"
 	"reflect"
 	"sync"
 	"unicode/utf8"
-	"encoding/json"
 )
 
 // Strings for use with buffer.WriteString.
@@ -30,6 +30,19 @@ const (
 	noVerbString      = "%!(NOVERB)"
 	invReflectString  = "<invalid reflect.Value>"
 )
+
+var marshalJSON func(v interface{}) ([]byte, error)
+
+func init() {
+	marshalJSON = json.Marshal
+}
+
+func SetMarshalJSON(m func(v interface{}) ([]byte, error)) {
+	if m == nil {
+		return
+	}
+	marshalJSON = m
+}
 
 // State represents the printer state passed to custom formatters.
 // It provides access to the io.Writer interface plus information about
@@ -54,7 +67,7 @@ type Formatter interface {
 }
 
 // Stringer is implemented by any value that has a String method,
-// which defines the ``native'' format for that value.
+// which defines the “native” format for that value.
 // The String method is used to print values passed as an operand
 // to any format that accepts a string or to an unformatted printer
 // such as Print.
@@ -659,7 +672,7 @@ func (p *pp) printArg(arg interface{}, verb rune) {
 	case 'p':
 		p.fmtPointer(reflect.ValueOf(arg), 'p')
 	case 'j':
-		data,_ := json.Marshal(arg)
+		data, _ := marshalJSON(arg)
 		p.fmt.buf.write(data)
 		return
 	}
@@ -1177,4 +1190,3 @@ func (p *pp) doPrintln(a []interface{}) {
 	}
 	p.buf.writeByte('\n')
 }
-
