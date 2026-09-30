@@ -8,6 +8,7 @@ const (
 	FATAL
 	OFF
 )
+
 //
 var logLevelMap map[uint]string = map[uint]string{
 	DEBUG: "DEBUG",
@@ -20,13 +21,12 @@ var logLevelMap map[uint]string = map[uint]string{
 
 //
 type Config struct {
-	Tag         string `ini:"Tag"`         // default app
-	LogType     string `ini:"LogType"`     // support type:[File,Syslog] default File,
-	FileLogPath string `ini:"FileLogPath"` // defult path id logs
-	SysLogAddr  string `ini:"SysLogAddr"`  // support when type = Syslog ex: 127.0.0.1:514
-	AlsoStdout  bool   `ini:"AlsoStdout"`  // default false
-	Level       string `ini:"Level"`       // support level, low -> heigh: Debug, Info, Warn , Error ,Fatal, Off. default Debug
-	SplitType   string `ini:"SplitType"`   // support type: Daily,Hourly,4mb . default Daily
+	Tag         string `ini:"Tag" yoml:"Tag"`                 // default app
+	LogType     string `ini:"LogType" yoml:"LogType"`         // support type:[File,Syslog] default File,
+	FileLogPath string `ini:"FileLogPath" yoml:"FileLogPath"` // defult path id logs
+	SysLogAddr  string `ini:"SysLogAddr" yoml:"SysLogAddr"`   // support when type = Syslog ex: 127.0.0.1:514
+	AlsoStdout  bool   `ini:"AlsoStdout" yoml:"AlsoStdout"`   // default false
+	Level       string `ini:"Level" yoml:"Level"`             // support level, low -> heigh: Debug, Info, Warn , Error ,Fatal, Off. default Debug
+	SplitType   string `ini:"SplitType" yoml:"SplitType"`     // support type: Daily,Hourly,4mb . default Daily
 	limitSize   int64
 }
-
